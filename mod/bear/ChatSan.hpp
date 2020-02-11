@@ -30,7 +30,7 @@ THook(
       async_log("[CMD] %s:%s\n", p->getNameTag().c_str(), sv.c_str());
       return original(sh, iden, pk);
     } else
-      sendText(p, "Chat too fast");
+      sendText(p, "您发送信息的速度过快，请稍后再试。");
   }
   return nullptr;
 }
