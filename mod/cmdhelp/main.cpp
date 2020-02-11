@@ -201,9 +201,9 @@ static void oncmd_runas(argVec &a, CommandOrigin const &b, CommandOutput &outp) 
       ptr += a[i].size();
       buf[ptr++] = ' ';
     }
-    runcmdAs({buf, (size_t) ptr}, sp).isSuccess() ? outp.success() : outp.error("error");
+    runcmdAs({buf, (size_t) ptr}, sp).isSuccess() ? outp.success() : outp.error("发生未知错误");
   } else {
-    outp.error("Can't find player");
+    outp.error("未能找到此玩家");
   }
 }
 static void oncmd_bc(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
@@ -221,12 +221,12 @@ static void oncmd_jmsg(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
 }
 void mod_init(std::list<string> &modlist) {
   load();
-  register_cmd("c", oncmd, "open gui");
-  register_cmd("joinmsg", oncmd_jmsg, "joinmsg", 1);
+  register_cmd("c", oncmd, "打开命令GUI");
+  register_cmd("joinmsg", oncmd_jmsg, "更改玩家加入时的信息", 1);
   register_cmd("bc", oncmd_bc, "broadcast", 1);
-  register_cmd("reload_cmd", load, "reload cmds", 1);
+  register_cmd("reload_cmd", load, "重载CMDHelp配置", 1);
   register_cmd("sched", oncmd_sch, "schedule a delayed cmd", 1);
-  register_cmd("runas", oncmd_runas, "run cmd as", 1);
+  register_cmd("runas", oncmd_runas, "以某个玩家的身份运行命令", 1);
   reg_player_join(join);
   reg_useitemon(handle_u);
   do_log("loaded! " BDL_TAG "");

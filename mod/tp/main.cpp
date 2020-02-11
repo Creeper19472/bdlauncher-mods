@@ -136,7 +136,7 @@ static void oncmd_suic(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
 
 static void sendTPChoose(ServerPlayer *sp, int type) { // 0=t
 //  string name = sp->getNameTag();
-  gui_ChoosePlayer(sp, "Select target player", "Send teleport request", [type](ServerPlayer *xx, string_view dest) {
+  gui_ChoosePlayer(sp, "选择目标玩家", "发送传送请求", [type](ServerPlayer *xx, string_view dest) {
     SPBuf<512> sb;
     sb.write("tpa "sv);
     if (type == 0)
@@ -154,15 +154,15 @@ static void sendTPForm(const string &from, int type, ServerPlayer *sp) {
   SPBuf<512> sb;
   sb.write("§b ");
   sb.write(from);
-  sb.write((type ? " wants to teleport to your location" : " wants to teleport you to his location"));
-  sb.write(",you can enter \"/tpa ac\" to accept or \"/tpa de\" to reject");
+  sb.write((type ? " 想传送到你的位置" : " 想将您传送到他的位置"));
+  sb.write(",您可以键入 \"/tpa ac\" 来同意或键入 \"/tpa de\" 来拒绝");
   sendText(sp, sb);
   sb.clear();
   sb.write(from);
-  sb.write((type ? " want to teleport to your location" : " wants to teleport you to his location"));
+  sb.write((type ? " 想传送到你的位置" : " 想将您传送到他的位置"));
   SharedForm *sf = getForm("TP Request", sb.get());
-  sf->addButton("Accept");
-  sf->addButton("Refuse");
+  sf->addButton("同意传送请求");
+  sf->addButton("拒绝传送请求");
   sf->cb = [](ServerPlayer *sp, string_view choice, int idx) {
     idx == 0 ? runcmdAs("tpa ac", sp) : runcmdAs("tpa de", sp);
   };
@@ -171,14 +171,14 @@ static void sendTPForm(const string &from, int type, ServerPlayer *sp) {
 SharedForm TPGUI("Send teleport request", "Send teleport request", false);
 static void SendTPGUI(ServerPlayer *sp) { sendForm(*sp, &TPGUI); }
 static void initTPGUI() {
-  TPGUI.addButton("Teleport to a player");
-  TPGUI.addButton("Teleport a player to you");
+  TPGUI.addButton("传送到玩家");
+  TPGUI.addButton("传送玩家到你");
   TPGUI.cb = [](ServerPlayer *sp, string_view sv, int idx) { sendTPChoose(sp, idx); };
 }
 static unordered_map<string, string> player_target;
 void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
   if (!CanTP) {
-    getOutput().error("Teleport not enabled on this server!");
+    getOutput().error("传送功能被服务器禁用。");
     return;
   }
   auto sp = getSP(getOrigin().getEntity());
@@ -188,14 +188,14 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
   case TPCMD::ac: {
     if (tpmap.count(nam) == 0) return;
     tpreq &req = tpmap[nam];
-    getOutput().success("§bYou have accepted the send request from the other party");
+    getOutput().success("§b你接受对方的传送请求");
     player_target.erase(req.name);
     auto dst = getplayer_byname(req.name);
     if (dst) {
       SPBuf sb;
       sb.write("§b ");
       sb.write(nam);
-      sb.write(" accepted the transmission request");
+      sb.write(" 接受了传送请求");
       sendText(dst, sb);
       if (req.dir == 0) {
         // f
@@ -209,14 +209,14 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
   case TPCMD::de: {
     if (tpmap.count(nam) == 0) return;
     tpreq &req = tpmap[nam];
-    getOutput().success("§bYou have rejected the send request");
+    getOutput().success("§b你拒绝了传送请求");
     player_target.erase(req.name);
     auto dst = getplayer_byname(req.name);
     if (dst) {
       SPBuf sb;
       sb.write("§b ");
       sb.write(nam);
-      sb.write(" rejected the transmission request");
+      sb.write(" 拒绝了传送请求");
       sendText(dst, sb);
     }
     tpmap.erase(nam);
@@ -226,7 +226,7 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
       auto &nm = player_target[nam];
       if (tpmap.count(nm) && tpmap[nm].name == nam) {
         tpmap.erase(nm);
-        getOutput().success("cancelled");
+        getOutput().success("撤销传送请求成功");
       }
     }
   } break;
@@ -237,7 +237,7 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
   case TPCMD::f: {
     auto dst = getplayer_byname2(target);
     if (!dst) {
-      getOutput().error("target not found!");
+      getOutput().error("目标未找到！");
       return;
     }
     auto &dnm = dst->getNameTag();
