@@ -78,10 +78,10 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
       fm.sendTo(*sp);
       outp.success();
     } else {
-      outp.error("fucku");
+      outp.error("操你妈！");
     }
   } else {
-    outp.error("cant find");
+    outp.error("未能找到");
   }
 }
 static void join(ServerPlayer *sp) {
@@ -225,7 +225,7 @@ void mod_init(std::list<string> &modlist) {
   register_cmd("joinmsg", oncmd_jmsg, "更改玩家加入时的信息", 1);
   register_cmd("bc", oncmd_bc, "broadcast", 1);
   register_cmd("reload_cmd", load, "重载CMDHelp配置", 1);
-  register_cmd("sched", oncmd_sch, "schedule a delayed cmd", 1);
+  register_cmd("sched", oncmd_sch, "安排一个延迟的命令", 1);
   register_cmd("runas", oncmd_runas, "以某个玩家的身份运行命令", 1);
   reg_player_join(join);
   reg_useitemon(handle_u);
