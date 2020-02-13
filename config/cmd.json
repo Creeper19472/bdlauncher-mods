@@ -1,34 +1,62 @@
 [
     {
-        "type":"timer",
-        "time":5000,"shift":10,
-        "cmd":"say timer!"
+        "type":"timer-",
+        "time":5000,"shift":0,
+        "cmd":""
     },
 
     {
         "type":"join",
-        "cmd":"sched 10 %name% \"say §b $name$ joined this server\""
+        "cmd":"title %name% subtitle §6thirteenc先辈の小服,title %name% title §a 嘿！ §b%name% §a欢迎来到"
     },
 
     {
         "type":"form",
-        "text":"this is main menu",
+        "text":"Tip: 点击下方获取菜单以获取时钟，手持时钟点击地面可快捷地打开菜单。",
         "title":"Main menu",
         "name":"root",
         "buttons":[
-            ["kill me","money rd %name% 10","kill %name%"],
-            ["open submenu","","execute %name% ~ ~ ~ c sub1"],
-            ["buy sth","money rd %name% 10","give %name% dirt 10"],
-            ["sell dirt","clear %name% dirt 0 9,clear %name% dirt 0 1","money add %name% 1,tell %name% dirt is cheapppp"],   
-            ["magic","money rd %name% 10","!money add %name% 1;money add %name% 20"]]
+			["获取菜单", "give %name% clock", ""],
+            ["领地系统", "runas %name% c land", ""],
+			["经济系统", "runas %name% c money", ""],
+			["传送系统", "runas %name% c teleport", ""]
+			]
     }, 
 
     {
         "type":"form",   
-        "text":"sub menu",
-        "title":"sub",
-        "name":"sub1",
-        "buttons":[["me","","say %name% 114514"],["back","","execute %name% ~ ~ ~ c root"]]
+        "text":"圈地教程：\n/land a 然后点击方块以选定一个点\n/land b 然后点击方块以选定另一个点\n此时插件会根据两个点生成一个矩形区域，一个方块1金钱，新玩家会有1000金钱\n/land buy 购买选定区域",
+        "title":"领地系统",
+        "name":"land",
+        "buttons":[
+			["查询当前领地主人", "runas %name% land query", ""],
+			["信任玩家", "runas %name% land trustgui", ""],
+			["取消对一个玩家的信任", "runas %name% land untrustgui", ""],
+			["卖出领地", "tell %name% 使用/land sell 以卖出领地", ""]
+		]
+    },
+	
+    {
+        "type":"form",   
+        "text":"选择一个操作",
+        "title":"经济系统",
+        "name":"money",
+        "buttons":[
+			["查询余额", "runas %name% money query", ""],
+			["转账", "runas %name% money paygui", ""]
+		]
+    },
+	
+    {
+        "type":"form",   
+        "text":"添加一个家：/home add [名字]",
+        "title":"传送系统",
+        "name":"teleport",
+        "buttons":[
+			["传送玩家", "runas %name% tpa gui", ""],
+			["回家", "runas %name% home gui", ""],
+			["服务器地标", "runas %name% warp gui", ""]
+		]
     },
     
     {
