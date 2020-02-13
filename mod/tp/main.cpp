@@ -130,7 +130,7 @@ static void oncmd_suic(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   auto sp = getSP(b.getEntity());
   if (sp) {
     ((Mob *) sp)->kill();
-    outp.success("You are dead");
+    outp.success("诶唷！那看上去很疼");
   }
 }
 
@@ -188,7 +188,7 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
   case TPCMD::ac: {
     if (tpmap.count(nam) == 0) return;
     tpreq &req = tpmap[nam];
-    getOutput().success("§b你接受对方的传送请求");
+    getOutput().success("§b你接受了对方的传送请求");
     player_target.erase(req.name);
     auto dst = getplayer_byname(req.name);
     if (dst) {
@@ -242,37 +242,37 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
     }
     auto &dnm = dst->getNameTag();
     if (tpmap.count(dnm)) {
-      getOutput().error("A request of your target is pending.");
+      getOutput().error("您的传送请求正在处理中");
       return;
     }
     if (player_target.count(dnm)) {
-      getOutput().error("You have already initiated the request");
+      getOutput().error("您已经发起了一个传送请求");
       return;
     }
     player_target[nam] = dnm;
     tpmap[dnm]         = {0, nam, clock()};
-    getOutput().success("§bYou sent a teleport request to the target player");
+    getOutput().success("§b已将传送请求发送给目标玩家");
     sendTPForm(nam, 0, (ServerPlayer *) dst);
     return;
   }
   case TPCMD::t: {
     auto dst = getplayer_byname2(target);
     if (!dst) {
-      getOutput().error("target not found!");
+      getOutput().error("目标未找到！");
       return;
     }
     auto &dnm = dst->getNameTag();
     if (tpmap.count(dnm)) {
-      getOutput().error("A request of your target is pending.");
+      getOutput().error("您的传送请求正在处理中");
       return;
     }
     if (player_target.count(dnm)) {
-      getOutput().error("You have already initiated the request");
+      getOutput().error("您已经发起了一个传送请求");
       return;
     }
     player_target[nam] = dnm;
     tpmap[dnm]         = {1, nam, clock()};
-    getOutput().success("§bYou sent a teleport request to the target player");
+    getOutput().success("§b已将传送请求发送给目标玩家");
     sendTPForm(nam, 1, (ServerPlayer *) dst);
     return;
   }
@@ -281,12 +281,12 @@ void TPACommand::invoke(mandatory<TPCMD> mode, optional<string> target) {
 }
 static void oncmd_home(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   if (!CanHome) {
-    outp.error("Home not enabled on this server!");
+    outp.error("Home 功能未启用。请联系你的服务器管理员。");
     return;
   }
   ServerPlayer *sp = getSP(b.getEntity());
   if (!sp) {
-    outp.error("this is a command for players");
+    outp.error("这个命令仅供玩家使用");
     return;
   }
   Vec3 pos          = b.getWorldPosition();
@@ -295,13 +295,13 @@ static void oncmd_home(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     ARGSZ(2)
     home &myh = ply_homes[sp];
     if (myh.cnt >= MaxHomes) {
-      outp.error("Can't add more homes");
+      outp.error("你不能再添加你的家了！你的家太多了");
       return;
     }
     myh.vals.push_back(Vpos(pos.x, pos.y, pos.z, b.getEntity()->getDimensionId(), a[1]));
     myh.cnt++;
     myh.save(*sp);
-    outp.success("§bSuccessfully added a home");
+    outp.success("§b成功添加家");
   }
   if (a[0] == "del") {
     ARGSZ(2)
@@ -309,12 +309,12 @@ static void oncmd_home(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     for (auto i = myh.vals.begin(); i != myh.vals.end(); ++i) {
       if (i->name == a[1]) {
         myh.vals.erase(i);
-        outp.success("§bHome has been deleted");
+        outp.success("§b此家已被删除");
         myh.save(*sp);
         return;
       }
     }
-    outp.error("not found");
+    outp.error("删除请求无法完成，未能找到家。");
   }
   if (a[0] == "go") {
     ARGSZ(2)
@@ -322,19 +322,19 @@ static void oncmd_home(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     for (int i = 0; i < myh.cnt; ++i) {
       if (myh.vals[i].name == a[1]) {
         myh.vals[i].tele(*sp);
-        outp.success("§bTeleported you to home");
+        outp.success("§b已传送到家);
       }
     }
   }
   if (a[0] == "ls") {
     home &myh = ply_homes[sp];
-    outp.addMessage("§b====Home list====");
+    outp.addMessage("§b====Home 列表====");
     for (int i = 0; i < myh.cnt; ++i) outp.addMessage(myh.vals[i].name);
     outp.success("§b============");
   }
   if (a[0] == "gui") {
     home &myh = ply_homes[sp];
-    auto sf   = getForm("Home", "Please choose a home");
+    auto sf   = getForm("家", "请选择一个家");
     for (int i = 0; i < myh.cnt; ++i) {
       auto &hname = myh.vals[i].name;
       sf->addButton(hname);
@@ -351,7 +351,7 @@ static void oncmd_home(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   }
   if (a[0] == "delgui") {
     home &myh = ply_homes[sp];
-    auto sf   = getForm("Home", "Please choose a home to DELETE");
+    auto sf   = getForm("家", "请选择一个家来删除");
     for (int i = 0; i < myh.cnt; ++i) {
       auto &hname = myh.vals[i].name;
       sf->addButton(hname);
@@ -377,24 +377,24 @@ static void oncmd_warp(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     if (pl < 1) return;
     ARGSZ(2)
     add_warp(pos.x, pos.y, pos.z, b.getEntity()->getDimensionId(), string(a[1]));
-    outp.success("§bSuccessfully added a warp");
+    outp.success("§b成功增加地标");
     return;
   }
   if (a[0] == "del") {
     if (pl < 1) return;
     ARGSZ(2)
     del_warp(string(a[1]));
-    outp.success("§bSuccessfully deleted a Warp");
+    outp.success("§b成功删除地标");
     return;
   }
   if (a[0] == "ls") {
-    outp.addMessage("§b====Warp list====");
+    outp.addMessage("§b====地标列表====");
     for (auto const &i : warp_list) { outp.addMessage(i); }
     outp.success("§b===========");
     return;
   }
   if (a[0] == "gui") {
-    auto sf = getForm("Home", "Please choose a home");
+    auto sf = getForm("家", "请选择一个家");
     for (auto const &i : warp_list) {
       auto &hname = i;
       sf->addButton(hname);
@@ -413,7 +413,7 @@ static void oncmd_warp(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   auto it = warp.find(string(a[0]));
   if (it != warp.end()) {
     it->second.tele(*b.getEntity());
-    outp.success("§bTeleported you to warp");
+    outp.success("§b成功传送到地标");
     return;
   }
 }
@@ -421,26 +421,26 @@ static void oncmd_warp(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
 static unordered_map<string, pair<Vec3, int>> deathpoint;
 static void oncmd_back(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   if (!CanBack) {
-    outp.error("Back not enabled on this server");
+    outp.error("/Back 功能未启用。请联系你的服务器管理员。");
     return;
   }
   ServerPlayer *sp = (ServerPlayer *) b.getEntity();
   if (!sp) return;
   auto it = deathpoint.find(sp->getNameTag());
   if (it == deathpoint.end()) {
-    outp.error("Can't find deathpoint");
+    outp.error("未能找到死亡点，或该死亡点已被传送过。");
     return;
   }
   TeleportA(*sp, it->second.first, {it->second.second});
   deathpoint.erase(it);
-  outp.success("§bBack to deathpoint");
+  outp.success("§b成功返回死亡点");
 }
 static void handle_mobdie(Mob &mb, const ActorDamageSource &) {
   if (!CanBack) return;
   auto sp = getSP(mb);
   if (sp) {
     ServerPlayer *sp = (ServerPlayer *) &mb;
-    sendText(sp, "§bYou can use /back to return last deathpoint");
+    sendText(sp, "§b你可以键入 /back 来返回上一死亡点");
     deathpoint[sp->getNameTag()] = {sp->getPos(), sp->getDimensionId()};
   }
 }
@@ -453,9 +453,9 @@ THook(void *, _ZN12ServerPlayer9tickWorldERK4Tick, ServerPlayer *sp, unsigned lo
     if (it != tpmap.end()) {
       if (it->second.reqtime + CLOCKS_PER_SEC * TP_TIMEOUT <= clock()) {
         player_target.erase(it->second.name);
-        sendText(sp, "You rejected the TP request(Timeout)");
+        sendText(sp, "您拒绝了TP请求（超时）");
         auto sp2 = getuser_byname(it->second.name);
-        sendText(sp2, "Target rejected the TP request(Timeout)");
+        sendText(sp2, "目标拒绝了TP请求（超时）");
         tpmap.erase(it);
       }
     }
@@ -489,10 +489,10 @@ void mod_init(std::list<string> &modlist) {
   load_warps_new();
   load_cfg();
   initTPGUI();
-  register_cmd("suicide", oncmd_suic, "kill yourself");
-  register_cmd("home", oncmd_home, "home command");
-  register_cmd("warp", oncmd_warp, "warp command");
-  register_cmd("back", oncmd_back, "back to deathpoint");
+  register_cmd("suicide", oncmd_suic, "自杀");
+  register_cmd("home", oncmd_home, "创建，删除或传送到家");
+  register_cmd("warp", oncmd_warp, "创建，删除或传送到地标");
+  register_cmd("back", oncmd_back, "返回上一死亡点");
   reg_mobdie(handle_mobdie);
   register_commands();
   load_helper(modlist);
