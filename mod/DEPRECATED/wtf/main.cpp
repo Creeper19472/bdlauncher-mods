@@ -116,7 +116,7 @@ THook(__int64, _ZN4Core6Random13_genRandInt32Ev, void *thi) {
 }
 void mod_init(std::list<string> &modlist) {
   if (!getenv("EXP_OPTI")) {
-    printf("[ERR] Delete wtf.mod please or add EXP_OPTI to environment if you KNOW what you're doing.\n");
+    printf("[ERR] 请删除 wtf.mod 或者在你完全明白你在做什么时添加 EXP_OPTI 到运行环境中。\n");
     exit(0);
   }
   do_log("loaded! V2019-12-14");

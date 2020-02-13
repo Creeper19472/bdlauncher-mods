@@ -57,10 +57,10 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     for (int x = 0; x < 128; ++x) data.setPixel(datam[y * 128 + x], x, y);
   data.setLocked();
   data.save(*getMC()->getLevel()->getLevelStorage());
-  outp.success("okay!rejoin server to see new map");
+  outp.success("完成！重新加入到服务器来应用此更改。");
 }
 void mod_init(std::list<string> &modlist) {
   do_log("loaded! " BDL_TAG "");
-  register_cmd("map", oncmd, "CustomMap", 1);
+  register_cmd("map", oncmd, "自定义地图（功能暂且未知）", 1);
   load_helper(modlist);
 }
