@@ -40,7 +40,7 @@ static void oncmd(argVec &av, CommandOrigin const &co, CommandOutput &outp) {
   }
   name_map[string(av[0])] = buf.getstr();
   names.Put(av[0], buf.get());
-  outp.success("okay");
+  outp.success("Fuck Your Mother!");
 }
 void mod_init(std::list<string> &modlist) {
   do_log("Loaded " BDL_TAG "!");

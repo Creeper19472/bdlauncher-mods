@@ -5,8 +5,8 @@
 #include <cstdarg>
 
 const char meta[] __attribute__((used, section("meta"))) =
-    "name:cdk\n"
-    "version:20200121\n"
+    "name:CDK\n"
+    "version:20200212\n"
     "author:sysca11\n"
     "depend:base@20200121,command@20200121\n";
 
