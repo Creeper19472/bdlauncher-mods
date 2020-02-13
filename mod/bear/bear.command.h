@@ -18,7 +18,7 @@ struct ACCommand : CustomCommandContext {
 public:
   inline static alias_list aliases  = {"bear"};
   static constexpr auto cmd_name    = "ac";
-  static constexpr auto description = "AntiCheat functions";
+  static constexpr auto description = "惩治一切作弊者的命令";
   static constexpr auto permission  = CommandPermissionLevel::OP;
 
   ACCommand(CommandOrigin const &origin, CommandOutput &output) noexcept : CustomCommandContext(origin, output) {}
