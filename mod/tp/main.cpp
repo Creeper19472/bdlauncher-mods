@@ -322,7 +322,7 @@ static void oncmd_home(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     for (int i = 0; i < myh.cnt; ++i) {
       if (myh.vals[i].name == a[1]) {
         myh.vals[i].tele(*sp);
-        outp.success("§b已传送到家);
+        outp.success("§b已传送到家");
       }
     }
   }
