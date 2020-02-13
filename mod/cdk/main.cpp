@@ -40,7 +40,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   ARGSZ(1)
   string cdk = string(a[0]);
   if (!cdks.count(cdk)) {
-    outp.error("Invalid cdk");
+    outp.error("无效CDK");
     return;
   }
   auto run = cdks[cdk];
@@ -48,7 +48,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   async_log("[CDK] %s uses CDK %s\n", b.getName().c_str(), cdk.c_str());
   execute_cmdchain(run, b.getName(), false);
   save();
-  outp.success("§bYou used cdk: " + cdk);
+  outp.success("§b你使用了CDK: " + cdk);
 }
 static void load() {
   cdks.clear();
@@ -72,8 +72,8 @@ static void save() {
 void mod_init(std::list<string> &modlist) {
   initlog();
   load();
-  register_cmd("cdk", oncmd, "use a cdk");
-  register_cmd("reload_cdk", load, "reload cdks", 1);
+  register_cmd("cdk", oncmd, "使用一个CDK，并获得兑换奖品");
+  register_cmd("reload_cdk", load, "重载CDK配置", 1);
   do_log("loaded! V2019-12-11");
   load_helper(modlist);
 }

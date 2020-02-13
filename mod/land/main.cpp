@@ -74,7 +74,7 @@ void LDCommand::exit(mandatory<Exit> mode) {
   auto sp = getSP(getOrigin().getEntity());
   if (!sp) return;
   choose_state.defe(sp);
-  getOutput().success("§bExit selection mode, please input /land buy");
+  getOutput().success("§b要退出选择模式，请键入 /land buy");
 }
 void LDCommand::AB_(mandatory<AB> mode) {
   auto sp = getSP(getOrigin().getEntity());
@@ -90,10 +90,10 @@ void LDCommand::query(mandatory<Query> mode) {
   auto lp   = getFastLand(pos.x, pos.z, dim);
   if (lp) {
     char buf[1000];
-    snprintf(buf, 1000, "§bThis is %s's land", lp->owner);
+    snprintf(buf, 1000, "§b这里是 %s 的领地", lp->owner);
     getOutput().success(buf);
   } else {
-    getOutput().error("No land here");
+    getOutput().error("这里还没有领地");
     return;
   }
 }
@@ -107,7 +107,7 @@ void LDCommand::buy(mandatory<Buy> mode) {
   int x, z, dx, dz;
   int dim = sp->getDimensionId();
   if (startpos.count(hash) + endpos.count(hash) != 2) {
-    getOutput().error("Choose 2 points please.");
+    getOutput().error("请先选择两个点。");
     return;
   }
   choose_state.defe(sp);
@@ -119,17 +119,17 @@ void LDCommand::buy(mandatory<Buy> mode) {
   int deltax = dx - x + 1, deltaz = dz - z + 1;
   uint siz = deltax * deltaz;
   if (deltax >= 4096 || deltaz >= 4096 || siz >= 5000000) {
-    getOutput().error("Too big land");
+    getOutput().error("领地范围太大");
     return;
   }
   int price = siz * LAND_PRICE;
   if (price <= 0 || price >= 500000000) {
-    getOutput().error("Too big land");
+    getOutput().error("领地范围太大");
     return;
   }
   auto mon = get_money(nm);
   if (mon < price) {
-    getOutput().error("Money not enough");
+    getOutput().error("你的钱不够");
     return;
   }
   // step 2 check coll
@@ -147,7 +147,7 @@ void LDCommand::buy(mandatory<Buy> mode) {
   // step 3 add land
   set_money(nm, mon - price);
   addLand((x) ^ 0x80000000, (dx) ^ 0x80000000, (z) ^ 0x80000000, (dz) ^ 0x80000000, dim, nm);
-  getOutput().success("§bSuccessful land purchase");
+  getOutput().success("§b成功购买领地！");
 }
 void LDCommand::sell(mandatory<Sell> mode) {
   auto sp = getSP(getOrigin().getEntity());
@@ -161,9 +161,9 @@ void LDCommand::sell(mandatory<Sell> mode) {
     int siz = (lp->dx - lp->x) * (lp->dz - lp->z);
     add_money(nm, siz * LAND_PRICE2);
     removeLand(lp);
-    getOutput().success("§bYour land has been sold");
+    getOutput().success("§b你的领地被出售了");
   } else {
-    getOutput().error("No land here or not your land");
+    getOutput().error("此处没有领地存在，或你没有出售此领地的权限。");
     return;
   }
 }
@@ -186,7 +186,7 @@ void LDCommand::trust(mandatory<Trust> mode, mandatory<std::string> target) {
     sb.write(" a trusted player");
     getOutput().success(sb.getstr());
   } else {
-    getOutput().error("No land here or not your land");
+    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");
     return;
   }
 }
@@ -208,7 +208,7 @@ void LDCommand::untrust(mandatory<Untrust> mode, mandatory<std::string> target) 
     sb.write(" a untrusted player");
     getOutput().success(sb.getstr());
   } else {
-    getOutput().error("No land here or not your land");
+    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");
     return;
   }
 }
@@ -224,14 +224,14 @@ void LDCommand::perm(mandatory<Perm> mode, mandatory<int> perm) {
     DataLand dl{*lp};
     auto pm = (LandPerm) perm;
     if ((pm & PERM_ADMIN_FLY) && !op) {
-      getOutput().error("Permission denied");
+      getOutput().error("您没有合适的权限进行此操作，因此访问被拒绝。");
       return;
     }
     dl.perm = pm;
     updLand(dl);
-    getOutput().success("§bChange permissions successfully");
+    getOutput().success("§b成功更改权限");
   } else {
-    getOutput().error("No land here or not your land");
+    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");
     return;
   }
 }
@@ -249,10 +249,10 @@ void LDCommand::give(mandatory<Give>, mandatory<CommandSelector<Player>> target)
       dl.addOwner(dst->getNameTag(), true);
       dl.delOwner(sp->getNameTag());
       updLand(dl);
-      sendText(dst, "You get a land from " + sp->getNameTag());
+      sendText(dst, "你得到了一个领地，它来自 " + sp->getNameTag());
       getOutput().success("§bSuccessfully give your territory to " + dst->getNameTag());
     } else {
-      getOutput().error("No land here or not your land");
+      getOutput().error("此处没有领地，或不是您的领地。");
       return;
     }
   }
@@ -260,7 +260,7 @@ void LDCommand::give(mandatory<Give>, mandatory<CommandSelector<Player>> target)
 void LDCommand::trustgui(mandatory<Trustgui>) {
   auto sp = getSP(getOrigin().getEntity());
   if (sp) {
-    gui_ChoosePlayer(sp, "Choose players to trust", "Trust", [](ServerPlayer *xx, string_view dest) {
+    gui_ChoosePlayer(sp, "选择要成为受信任的玩家", "信任", [](ServerPlayer *xx, string_view dest) {
       SPBuf sb;
       sb.write("land trust \"");
       sb.write(dest);
@@ -269,7 +269,7 @@ void LDCommand::trustgui(mandatory<Trustgui>) {
     });
     getOutput().success();
   } else {
-    getOutput().error("Error");
+    getOutput().error("发生未知错误");
   }
 }
 void LDCommand::untrustgui(mandatory<Untrustgui>) {
@@ -306,7 +306,7 @@ void LDCommand::untrustgui(mandatory<Untrustgui>) {
       sendForm(*sp, sf);
       getOutput().success();
     } else {
-      getOutput().error("Error");
+      getOutput().error("发生未知错误");
     }
   }
 }
@@ -318,11 +318,11 @@ void LDOCommand::dumpall(mandatory<Dumpall> mode) {
         dl.dx ^ 0x80000000, dl.dz ^ 0x80000000, dl.dim, dl.perm);
     getOutput().addMessage(buf);
   });
-  getOutput().success("okay");
+  getOutput().success("命令成功完成。");
 }
 void LDOCommand::forceperm(mandatory<Forceperm>, mandatory<int> newperm) {
   iterLands([newperm](DataLand &dl) { dl.perm = (LandPerm) newperm; });
-  getOutput().success("okay");
+  getOutput().success("命令成功完成。");
 }
 void LDOCommand::fix(mandatory<Fix>) {
   db.Del("land_fixed_v3");
@@ -335,9 +335,9 @@ void LDOCommand::reload(mandatory<Reload>) {
 
 static void NoticePerm(FastLand *fl, ServerPlayer *sp) {
   SPBuf sb;
-  sb.write("§cThis is "sv);
+  sb.write("§c这是 "sv);
   sb.write(fl->getOwner());
-  sb.write("'s land"sv);
+  sb.write(" 的领地"sv);
   sendText(sp, sb.get(), POPUP);
 }
 static bool handle_dest(GameMode *a0, BlockPos const *a1) {
