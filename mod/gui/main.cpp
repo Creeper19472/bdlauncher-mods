@@ -101,7 +101,7 @@ THook(
       if (id == form->fid) {
         auto oldfre    = form->needfree;
         form->needfree = false;
-        player_mp.dat.erase(p); // WHY USE THIS SHIT HACK? A FORM CAN BE OPENED IN ANOTHER ONE
+        player_mp.dat.erase(p); // 为什么要用这该死的黑客技术？ A FORM CAN BE OPENED IN ANOTHER ONE
         // printf("recv %d %d\n",id,form->fid);
         form->process(p, access(pk, string, 40));
         form->needfree = oldfre;
@@ -181,5 +181,5 @@ bs.writeUnsignedVarInt(54);bs.writeUnsignedVarInt(3);bs.writeFloat(5);
 void mod_init(std::list<string> &modlist) {
   do_log("Loaded " BDL_TAG "");
   load_helper(modlist);
-  register_cmd("g", cm, "debug", 1);
+  register_cmd("vars_debug", cm, "来自vars.cmd的烂摊子指令。在你身旁召唤一只无敌的钻石甲僵尸。", 1);
 }

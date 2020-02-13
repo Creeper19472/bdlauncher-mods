@@ -29,7 +29,7 @@ static void load() {
 }
 static void oncmd(argVec &av, CommandOrigin const &co, CommandOutput &outp) {
   if (av.size() != 2) {
-    outp.error("arg");
+    outp.error("命令语法不正确");
     return;
   }
   SPBuf<1024> buf;
@@ -40,11 +40,11 @@ static void oncmd(argVec &av, CommandOrigin const &co, CommandOutput &outp) {
   }
   name_map[string(av[0])] = buf.getstr();
   names.Put(av[0], buf.get());
-  outp.success("okay");
+  outp.success("命令成功完成。");
 }
 void mod_init(std::list<string> &modlist) {
   do_log("Loaded " BDL_TAG "!");
   load();
-  register_cmd("cname", oncmd, "custom name", 1);
+  register_cmd("cname", oncmd, "自定义一个玩家的名字，无论他之前是谁", 1);
   load_helper(modlist);
 }
