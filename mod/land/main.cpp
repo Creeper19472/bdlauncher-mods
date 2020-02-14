@@ -31,6 +31,7 @@
 #include "data.hpp"
 #include "land.command.h"
 #include "PlayerMap.h"
+#include "lang.h"
 const char meta[] __attribute__((used, section("meta"))) =
     "name:land\n"
     "version:20200121\n"
@@ -74,13 +75,13 @@ void LDCommand::exit(mandatory<Exit> mode) {
   auto sp = getSP(getOrigin().getEntity());
   if (!sp) return;
   choose_state.defe(sp);
-  getOutput().success("§b要退出选择模式，请键入 /land buy");
+  getOutput().success("§b要退出选择模式，请键入 /land buy");//L_LAND_BUY_EXIT_TEXT
 }
 void LDCommand::AB_(mandatory<AB> mode) {
   auto sp = getSP(getOrigin().getEntity());
   if (!sp) return;
   choose_state[sp] = (mode == AB::b) + 1;
-  getOutput().success("§bEnter selection mode, please click on the ground to select point");
+  getOutput().success("§bEnter selection mode, please click on the ground to select point");//L_LAND_BUY_ENTRY_TEXT
 }
 void LDCommand::query(mandatory<Query> mode) {
   auto sp = getSP(getOrigin().getEntity());
@@ -90,10 +91,10 @@ void LDCommand::query(mandatory<Query> mode) {
   auto lp   = getFastLand(pos.x, pos.z, dim);
   if (lp) {
     char buf[1000];
-    snprintf(buf, 1000, "§b这里是 %s 的领地", lp->owner);
+    snprintf(buf, 1000, "§b这里是 %s 的领地", lp->owner);//L_LAND_OWNED_TEXT
     getOutput().success(buf);
   } else {
-    getOutput().error("这里还没有领地");
+    getOutput().error("这里还没有领地");//L_LAND_UNOWNED_TEXT
     return;
   }
 }
@@ -107,7 +108,7 @@ void LDCommand::buy(mandatory<Buy> mode) {
   int x, z, dx, dz;
   int dim = sp->getDimensionId();
   if (startpos.count(hash) + endpos.count(hash) != 2) {
-    getOutput().error("请先选择两个点。");
+    getOutput().error("请先选择两个点。");//L_LAND_BUY_UNSELECTED
     return;
   }
   choose_state.defe(sp);
@@ -119,17 +120,17 @@ void LDCommand::buy(mandatory<Buy> mode) {
   int deltax = dx - x + 1, deltaz = dz - z + 1;
   uint siz = deltax * deltaz;
   if (deltax >= 4096 || deltaz >= 4096 || siz >= 5000000) {
-    getOutput().error("领地范围太大");
+    getOutput().error("领地范围太大");//L_LAND_BUY_TOO_WIDE
     return;
   }
   int price = siz * LAND_PRICE;
   if (price <= 0 || price >= 500000000) {
-    getOutput().error("领地范围太大");
+    getOutput().error("领地范围太大");//L_LAND_BUY_TOO_WIDE
     return;
   }
   auto mon = get_money(nm);
   if (mon < price) {
-    getOutput().error("你的钱不够");
+    getOutput().error("你的钱不够");//L_LAND_BUY_MONEY_LESS
     return;
   }
   // step 2 check coll
@@ -137,17 +138,20 @@ void LDCommand::buy(mandatory<Buy> mode) {
     for (int j = z; j <= dz; ++j) {
       auto lp = getFastLand(i, j, dim);
       if (lp) {
-        sb.write("Land collision detected! hint: "sv);
-        sb.write(lp->getOwner());
-        sb.write("'s land"sv);
-        getOutput().error(sb.getstr());
+        char buf[256];
+        snprintf(buf,256,"Land collision detected! hint: %s's land.", lp->getOwner());//L_LAND_COLLISION_HINT
+        getOutput().error(string(buf));
+        // sb.write("Land collision detected! hint: "sv);
+        // sb.write(lp->getOwner());
+        // sb.write("'s land"sv);
+        // getOutput().error(sb.getstr());
         return;
       }
     }
   // step 3 add land
   set_money(nm, mon - price);
   addLand((x) ^ 0x80000000, (dx) ^ 0x80000000, (z) ^ 0x80000000, (dz) ^ 0x80000000, dim, nm);
-  getOutput().success("§b成功购买领地！");
+  getOutput().success("§b成功购买领地！");//L_LAND_BUY_SUCC
 }
 void LDCommand::sell(mandatory<Sell> mode) {
   auto sp = getSP(getOrigin().getEntity());
@@ -161,9 +165,9 @@ void LDCommand::sell(mandatory<Sell> mode) {
     int siz = (lp->dx - lp->x) * (lp->dz - lp->z);
     add_money(nm, siz * LAND_PRICE2);
     removeLand(lp);
-    getOutput().success("§b你的领地被出售了");
+    getOutput().success("§b你的领地被出售了");//L_LAND_SELL_SUCC
   } else {
-    getOutput().error("此处没有领地存在，或你没有出售此领地的权限。");
+    getOutput().error("此处没有领地存在，或你没有出售此领地的权限。");//L_LAND_SELL_FAILED
     return;
   }
 }
@@ -181,12 +185,15 @@ void LDCommand::trust(mandatory<Trust> mode, mandatory<std::string> target) {
     DataLand dl(*lp);
     dl.addOwner(target);
     updLand(dl);
-    sb.write("§bMake ");
-    sb.write(target);
-    sb.write(" a trusted player");
-    getOutput().success(sb.getstr());
+    char buf[128];
+    snprintf(buf,128,L_LAND_TRUST_SUCC, string(target));//L_LAND_TRUST_SUCC
+    getOutput().success(string(buf));
+    // sb.write("§bMake ");
+    // sb.write(target);
+    // sb.write(" a trusted player");
+    // getOutput().success(sb.getstr());
   } else {
-    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");
+    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");//L_LAND_TRUST_FAILED
     return;
   }
 }
@@ -203,12 +210,15 @@ void LDCommand::untrust(mandatory<Untrust> mode, mandatory<std::string> target) 
     DataLand dl{*lp};
     dl.delOwner(target);
     updLand(dl);
-    sb.write("§bMake ");
-    sb.write(target);
-    sb.write(" a untrusted player");
-    getOutput().success(sb.getstr());
+    char buf[128];
+    snprintf(buf,128,L_LAND_UNTRUST_SUCC, target);//L_LAND_UNTRUST_SUCC
+    getOutput().success(string(buf));
+    // sb.write("§bMake ");
+    // sb.write(target);
+    // sb.write(" a untrusted player");
+    // getOutput().success(sb.getstr());
   } else {
-    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");
+    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");//L_LAND_UNTRUST_FAILED
     return;
   }
 }
@@ -224,14 +234,14 @@ void LDCommand::perm(mandatory<Perm> mode, mandatory<int> perm) {
     DataLand dl{*lp};
     auto pm = (LandPerm) perm;
     if ((pm & PERM_ADMIN_FLY) && !op) {
-      getOutput().error("您没有合适的权限进行此操作，因此访问被拒绝。");
+      getOutput().error("您没有合适的权限进行此操作，因此访问被拒绝。");//L_LAND_UNAUTHORIZED
       return;
     }
     dl.perm = pm;
     updLand(dl);
-    getOutput().success("§b成功更改权限");
+    getOutput().success("§b成功更改权限");//L_LAND_PERM_CHANGE_SUCC
   } else {
-    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");
+    getOutput().error("此处没有领地，或您没有合适的权限进行此操作。");//L_LAND_UNAUTHORIZED
     return;
   }
 }
@@ -249,10 +259,10 @@ void LDCommand::give(mandatory<Give>, mandatory<CommandSelector<Player>> target)
       dl.addOwner(dst->getNameTag(), true);
       dl.delOwner(sp->getNameTag());
       updLand(dl);
-      sendText(dst, "你得到了一个领地，它来自 " + sp->getNameTag());
+      sendText(dst, "你得到了一个领地，它来自 " + sp->getNameTag());//L_LAND_GIVE_GOT_A_LAND
       getOutput().success("§bSuccessfully give your territory to " + dst->getNameTag());
     } else {
-      getOutput().error("此处没有领地，或不是您的领地。");
+      getOutput().error("此处没有领地，或不是您的领地。");//L_LAND_UNAUTHORIZED
       return;
     }
   }
@@ -260,7 +270,7 @@ void LDCommand::give(mandatory<Give>, mandatory<CommandSelector<Player>> target)
 void LDCommand::trustgui(mandatory<Trustgui>) {
   auto sp = getSP(getOrigin().getEntity());
   if (sp) {
-    gui_ChoosePlayer(sp, "选择要成为受信任的玩家", "信任", [](ServerPlayer *xx, string_view dest) {
+    gui_ChoosePlayer(sp, L_LAND_TRUST_GUI_A, L_LAND_TRUST_GUI_B, [](ServerPlayer *xx, string_view dest) {//L_LAND_TRUST_GUI_A L_LAND_TRUST_GUI_B
       SPBuf sb;
       sb.write("land trust \"");
       sb.write(dest);
@@ -269,7 +279,7 @@ void LDCommand::trustgui(mandatory<Trustgui>) {
     });
     getOutput().success();
   } else {
-    getOutput().error("发生未知错误");
+    getOutput().error(L_LAND_UNKNOWN_ERROR);//L_LAND_UNKNOWN_ERROR
   }
 }
 void LDCommand::untrustgui(mandatory<Untrustgui>) {
@@ -279,7 +289,7 @@ void LDCommand::untrustgui(mandatory<Untrustgui>) {
     int dim   = sp->getDimensionId();
     auto lp   = getFastLand(pos.x, pos.z, dim);
     if (lp && (lp->chkOwner(sp->getNameTag()) == 2 || sp->getPlayerPermissionLevel() > 1)) {
-      SharedForm *sf = getForm("Untrust a player", "Untrust a player");
+      SharedForm *sf = getForm(L_LAND_UNTRUST_GUI_A, L_LAND_UNTRUST_GUI_B);//L_LAND_UNTRUST_GUI_A L_LAND_UNTRUST_GUI_B
       DataLand dl{*lp};
       static_deque<string_view> owners;
       split_string(dl.owner, owners, "||");
@@ -306,7 +316,7 @@ void LDCommand::untrustgui(mandatory<Untrustgui>) {
       sendForm(*sp, sf);
       getOutput().success();
     } else {
-      getOutput().error("发生未知错误");
+      getOutput().error(L_LAND_UNKNOWN_ERROR);//L_LAND_UNKNOWN_ERROR
     }
   }
 }
@@ -318,15 +328,15 @@ void LDOCommand::dumpall(mandatory<Dumpall> mode) {
         dl.dx ^ 0x80000000, dl.dz ^ 0x80000000, dl.dim, dl.perm);
     getOutput().addMessage(buf);
   });
-  getOutput().success("命令成功完成。");
+  getOutput().success(L_LAND_SUCC);//L_LAND_SUCC
 }
 void LDOCommand::forceperm(mandatory<Forceperm>, mandatory<int> newperm) {
   iterLands([newperm](DataLand &dl) { dl.perm = (LandPerm) newperm; });
-  getOutput().success("命令成功完成。");
+  getOutput().success(L_LAND_SUCC);//L_LAND_SUCC
 }
 void LDOCommand::fix(mandatory<Fix>) {
   db.Del("land_fixed_v3");
-  getOutput().success("scheduled data fix at next server start");
+  getOutput().success(L_LAND_FIX_SCHEDULED);//L_LAND_FIX_SCHEDULED
 }
 void LDOCommand::reload(mandatory<Reload>) {
   loadcfg();
@@ -334,11 +344,16 @@ void LDOCommand::reload(mandatory<Reload>) {
 }
 
 static void NoticePerm(FastLand *fl, ServerPlayer *sp) {
-  SPBuf sb;
-  sb.write("§c这是 "sv);
-  sb.write(fl->getOwner());
-  sb.write(" 的领地"sv);
-  sendText(sp, sb.get(), POPUP);
+  //modified code:
+  char buf[128];
+  snprintf(buf,128,L_LAND_PERM_NOTICE,fl->getOwner());//L_LAND_PERM_NOTICE
+  sendText(sp, string(buf), POPUP);
+
+  // SPBuf sb;
+  // sb.write("§c这是 "sv);
+  // sb.write(fl->getOwner());
+  // sb.write(" 的领地"sv);
+  // sendText(sp, sb.get(), POPUP);
 }
 static bool handle_dest(GameMode *a0, BlockPos const *a1) {
   ServerPlayer *sp = a0->getPlayer();
@@ -389,13 +404,13 @@ static bool handle_useion(GameMode *a0, ItemStack *a1, BlockPos const *a2, Block
   if (choose_state[sp] != 0) {
     if (choose_state[sp] == 1) {
       startpos[hash] = {a2->x, a2->z};
-      sendText(sp, "§bPoint A selected");
+      sendText(sp, L_LAND_SELECT_A);//L_LAND_SELECT_A
     }
     if (choose_state[sp] == 2) {
       endpos[hash] = {a2->x, a2->z};
       char buf[1000];
       auto siz = (abs(startpos[hash].x - endpos[hash].x) + 1) * (abs(startpos[hash].z - endpos[hash].z) + 1);
-      snprintf(buf, 1000, "§bPoint B selected,size: %d price: %d", siz, siz * LAND_PRICE);
+      snprintf(buf, 1000, L_LAND_SELECT_B, siz, siz * LAND_PRICE);//L_LAND_SELECT_B
       sendText(sp, buf);
     }
     return 0;
@@ -453,17 +468,20 @@ THook(void *, _ZN12ServerPlayer9tickWorldERK4Tick, ServerPlayer *sp, unsigned lo
       }*/
     }
     if (oldname != newname) {
-      SPBuf sb;
+      // SPBuf sb;
+      char buf[256];
       if (newname == "") {
-        sb.write("You lefted "sv);
-        sb.write(string_view(oldname));
-        sb.write("'s land!"sv);
+        snprintf(buf,256,L_LAND_LEFT,oldname);//L_LAND_LEFT
+        // sb.write("You lefted "sv);
+        // sb.write(string_view(oldname));
+        // sb.write("'s land!"sv);
       } else {
-        sb.write("You entered "sv);
-        sb.write(newname);
-        sb.write("'s land!"sv);
+        snprintf(buf,256,L_LAND_ENTER,newname);//L_LAND_ENTER
+        // sb.write("You entered "sv);
+        // sb.write(newname);
+        // sb.write("'s land!"sv);
       }
-      sendText(sp, sb.get(), TextType::TIP);
+      sendText(sp, buf, TextType::TIP);
       oldname = newname;
     }
   }

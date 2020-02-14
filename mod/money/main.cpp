@@ -76,7 +76,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
       dst = b.getName();
     }
     char buf[1024];
-    snprintf(buf, 1024, "§b%s's money: %d", dst.c_str(), get_money(dst));
+    snprintf(buf, 1024, L_MONEY_QUERY_TEXT, dst.c_str(), get_money(dst));//L_MONEY_QUERY_TEXT
     outp.addMessage(string(buf));
     outp.success();
     return;
@@ -95,31 +95,35 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     }
     set_money(dst, amo);
     char buf[1024];
-    snprintf(buf, 1024, "§bSucceed to set %s 's money to %d", dst.c_str(), get_money(dst));
+    snprintf(buf, 1024, "§bSucceed to set %s 's money to %d", dst.c_str(), get_money(dst));//L_MONEY_SET_TEXT
     outp.success(string(buf));
   }
   if (a[0] == "add") {
     if ((int) b.getPermissionsLevel() < 1) return;
     ARGSZ(2)
     // int amo;
-    SPBuf buf;
+    // SPBuf buf;
+    char buf[256];
     if (a.size() == 3) {
+      snprintf(buf,256,"§bAdded %s money for %s",string(a[2]),string(a[1]));//L_MONEY_ADD_TEXT
       add_money(a[1], atoi(a[2]));
-      buf.write("§bAdded ");
-      buf.write(a[2]);
-      buf.write("money for ");
-      buf.write(a[1]);
+      // buf.write("§bAdded ");
+      // buf.write(a[2]);
+      // buf.write("money for ");
+      // buf.write(a[1]);
     } else {
       add_money(b.getName(), atoi(a[1]));
-      buf.write("§bAdded ");
-      buf.write(a[1]);
-      buf.write("money for ");
-      buf.write(b.getName());
+      snprintf(buf,256,"§bAdded %s money for %s",string(a[1]),b.getName());//L_MONEY_ADD_TEXT
+      // buf.write("§bAdded ");
+      // buf.write(a[1]);
+      // buf.write("money for ");
+      // buf.write(b.getName());
     }
-    outp.success(buf.getstr());
+    outp.success(string(buf));
+    // outp.success(buf.getstr());
     if (a.size() == 3) {
       auto dstp = getplayer_byname(a[1]);
-      if (dstp) sendText(dstp, buf.get());
+      if (dstp) sendText(dstp, string(buf));
     }
     outp.success();
   }
@@ -129,11 +133,16 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     string_view dst = a[1];
     int amo         = atoi(a[2]);
     if (red_money(dst, amo)) {
-      outp.success("§bDeducted successfully");
+      outp.success("§bDeducted successfully");//L_MONEY_DEDUCT_SUCC
       auto dstp = getplayer_byname(dst);
-      if (dstp) sendText(dstp, "§bYou used " + std::to_string(amo) + " money");
+      if (dstp){
+        char buf[256];
+        snprintf(buf,256,"§bYou used %d money.",std::to_string(amo));//L_MONEY_DEDUCT_TEXT
+        sendText(dstp,string(buf));
+        // sendText(dstp, "§bYou used " + std::to_string(amo) + " money");
+      }
     } else {
-      outp.error("§bTarget player does not have enough money");
+      outp.error("§bTarget player does not have enough money");//L_MONEY_DEDUCT_FAILED
     }
   }
   if (a[0] == "pay") {
@@ -151,24 +160,33 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
         add_money(pl2, mon);
         char msg[1000];
         // sprintf(msg,"§bYou gave %s %d money",pl2.c_str(),mon);
-        snprintf(msg, 1000, "§bYou gave %s %d money", pl2.c_str(), mon);
+        snprintf(msg, 1000, "§bYou gave %s %d money", pl2.c_str(), mon);//L_MONEY_PAY_SUCC
         outp.success(string(msg));
         auto dstp = getplayer_byname(pl2);
-        if (dstp) sendText(dstp, "§bYou get " + std::to_string(mon) + " money from " + pl);
+        if (dstp){
+          char buf[256];
+          snprintf(buf, 256, "§bYou get %d money from %s", mon, pl);//L_MONEY_GET_TEXT
+          sendText(dstp, string(buf));
+          // sendText(dstp, "§bYou get " + std::to_string(mon) + " money from " + pl);
+        }
       } else {
-        outp.error("You don't have enough money");
+        outp.error("You don't have enough money");//L_MONEY_PAY_FAIL
       }
     }
   }
   if (a[0] == "paygui") {
     string nm = b.getName();
     gui_ChoosePlayer(
-        (ServerPlayer *) b.getEntity(), "Choose a player to pay", "Pay", [](ServerPlayer *p, string_view chosen) {
+        (ServerPlayer *) b.getEntity(), L_MONEY_PAY_GUI_A, "Pay", [](ServerPlayer *p, string_view chosen) { //L_MONEY_PAY_GUI_A L_MONEY_PAY_GUI_B
           SPBuf sb;
-          sb.write("How much do you pay to ");
-          sb.write(chosen);
-          sb.write("?");
+          // char buf[256];
+          // snprintf(buf,256,L_MONEY_PAY_GUI_C,string(chosen));//L_MONEY_PAY_GUI_C
+          sb.write("你想要向玩家%s转账多少钱呢?",chosen);
+          // sb.write("How much do you pay to ");
+          // sb.write(chosen);
+          // sb.write("?");
           SharedForm *sf = getForm("Pay", "", true);
+          // sf->addInput(string(buf));
           sf->addInput(sb.get());
           string chosen_c(chosen);
           sf->cb = [chosen_c](ServerPlayer *p, string_view mon, int idx) {
@@ -188,7 +206,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
 void mod_init(std::list<string> &modlist) {
   do_log("loaded! " BDL_TAG "");
   loadcfg();
-  register_cmd("money", oncmd, "money command");
-  register_cmd("reload_money", loadcfg, "reload money cfg", 1);
+  register_cmd("money", oncmd, L_MONEY_CMD_MONEY);//L_MONEY_CMD_MONEY
+  register_cmd("reload_money", loadcfg, L_MONEY_CMD_RELOAD, 1);//L_MONEY_CMD_RELOAD
   load_helper(modlist);
 }

@@ -1,6 +1,7 @@
 #include <Loader.h>
 //#include <MC.h>
 #include "base.h"
+#include "lang.h"
 #include <fstream>
 #include <cstdarg>
 
@@ -40,7 +41,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   ARGSZ(1)
   string cdk = string(a[0]);
   if (!cdks.count(cdk)) {
-    outp.error("无效CDK");
+    outp.error("无效CDK");//L_CDK_INVALID_CDK
     return;
   }
   auto run = cdks[cdk];
@@ -48,7 +49,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   async_log("[CDK] %s uses CDK %s\n", b.getName().c_str(), cdk.c_str());
   execute_cmdchain(run, b.getName(), false);
   save();
-  outp.success("§b你使用了CDK: " + cdk);
+  outp.success("§b你使用了CDK: " + cdk);//L_CDK_USE_CDK
 }
 static void load() {
   cdks.clear();
@@ -72,8 +73,8 @@ static void save() {
 void mod_init(std::list<string> &modlist) {
   initlog();
   load();
-  register_cmd("cdk", oncmd, "使用一个CDK，并获得兑换奖品");
-  register_cmd("reload_cdk", load, "重载CDK配置", 1);
+  register_cmd("cdk", oncmd, "使用一个CDK，并获得兑换奖品");//L_CDK_CMD_CDK
+  register_cmd("reload_cdk", load, "重载CDK配置", 1);//L_CDK_CMD_RELOAD
   do_log("loaded! V2019-12-11");
   load_helper(modlist);
 }

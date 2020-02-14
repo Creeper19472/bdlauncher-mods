@@ -14,7 +14,7 @@ THook(
     if (ChatLimit(p))
       return original(sh, iden, pk);
     else
-      sendText(p, "你的聊天速度太快了，请稍后再试！");
+      sendText(p, "你的聊天速度太快了，请稍后再试！");//L_BEAR_CHAT_TOO_FAST
   }
   return nullptr;
 }
@@ -30,7 +30,7 @@ THook(
       async_log("[CMD] %s:%s\n", p->getNameTag().c_str(), sv.c_str());
       return original(sh, iden, pk);
     } else
-      sendText(p, "你的聊天速度太快了，请稍后再试！");
+      sendText(p, "你的聊天速度太快了，请稍后再试！");//L_BEAR_CHAT_TOO_FAST
   }
   return nullptr;
 }

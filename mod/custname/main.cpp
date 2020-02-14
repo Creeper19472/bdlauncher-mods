@@ -1,5 +1,6 @@
 #include <Loader.h>
 //#include <MC.h>
+#include "lang.h"
 #include "base.h"
 
 const char meta[] __attribute__((used, section("meta"))) =
@@ -29,7 +30,7 @@ static void load() {
 }
 static void oncmd(argVec &av, CommandOrigin const &co, CommandOutput &outp) {
   if (av.size() != 2) {
-    outp.error("命令语法不正确");
+    outp.error("命令语法不正确");//L_CNAME_SYN_ERR
     return;
   }
   SPBuf<1024> buf;
@@ -40,11 +41,11 @@ static void oncmd(argVec &av, CommandOrigin const &co, CommandOutput &outp) {
   }
   name_map[string(av[0])] = buf.getstr();
   names.Put(av[0], buf.get());
-  outp.success("命令成功完成。");
+  outp.success("命令成功完成。");//L_CNAME_OPERATION_SUCC
 }
 void mod_init(std::list<string> &modlist) {
   do_log("Loaded " BDL_TAG "!");
   load();
-  register_cmd("cname", oncmd, "自定义一个玩家的名字，无论他之前是谁", 1);
+  register_cmd("cname", oncmd, "自定义一个玩家的名字，无论他之前是谁", 1);//L_CNAME_CMD_HLP
   load_helper(modlist);
 }

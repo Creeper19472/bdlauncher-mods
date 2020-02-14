@@ -102,7 +102,7 @@ THook(
   auto succ = ban_data.Get(xuid, val);
   if (!succ) { ban_data.Put(xuid, pn); }
   if (isBanned(pn) || (succ && isBanned(val))) {
-    snh->disconnectClient(a, YOU_R_BANNED, false);
+    snh->disconnectClient(a, L_BEAR_PLAYER_BANNED_MSG, false);
     return nullptr;
   }
   return original(snh, a, b);
@@ -125,13 +125,13 @@ static bool is_muted(const string &name) {
 }
 static bool hkc(ServerPlayer *b, string &c) {
   if (c.size() > MAX_CHAT_SIZE) {
-    sendText(b, "您的信息太长了");
+    sendText(b, "您的信息太长了");//L_BEAR_MESSAGE_TOO_LONG
     return 0;
   }
   for (auto &i : banword) {
     if (c.find(i) != string::npos) {
       SPBuf<512> sb;
-      sb.write("词语被屏蔽: ");
+      sb.write("词语被屏蔽: ");//L_BEAR_MESSAGE_BLOCKED
       sb.write(i);
       sendText(b, sb.get());
       return 0;
@@ -139,7 +139,7 @@ static bool hkc(ServerPlayer *b, string &c) {
   }
   auto &name = b->getNameTag();
   if (is_muted(name)) {
-    sendText(b, "你被禁言了");
+    sendText(b, "你被禁言了");//L_BEAR_PLAYER_MUTED
     return 0;
   }
   async_log("[CHAT] %s: %s\n", name.c_str(), c.c_str());
@@ -152,7 +152,7 @@ void ACCommand::crashme(mandatory<Crashme>) { _ZN14ServerInstance14onLevelCorrup
 void ACCommand::kickall(mandatory<Kickall>) {
   auto x = getSrvLevel()->getUsers();
   for (auto &i : *x) { runcmd("kick \"" + i->getNameTag() + "\""); }
-  getOutput().success("已踢出玩家");
+  getOutput().success("已踢出玩家");//L_BEAR_KICK_PLAYER_SUCC
 }
 void ACCommand::mute(mandatory<Mute>, mandatory<CommandSelector<Player>> target, mandatory<int> time_) {
   int to       = time_ == -1 ? 0 : (time(0) + time_);
@@ -160,7 +160,7 @@ void ACCommand::mute(mandatory<Mute>, mandatory<CommandSelector<Player>> target,
   if (!Command::checkHasTargets(results, getOutput())) return;
   for (auto &player : results) {
     mute_time[player.getNameTag()] = to;
-    getOutput().addMessage(player.getNameTag() + " 被禁言了");
+    getOutput().addMessage(player.getNameTag() + " 被禁言了");//L_BEAR_MUTE_PLAYER_MSG
   }
   getOutput().success();
 }
@@ -173,7 +173,7 @@ void ACCommand::ban(mandatory<Ban>, mandatory<string> target, optional<int> time
     ban_data.Put(x->getXUID(), x->getNameTag());
     forceKickPlayer(*x);
   }
-  getOutput().success("§b" + target + " 被从服务器封禁");
+  getOutput().success("§b" + target + " 被从服务器封禁");//L_BEAR_PLAYER_BANNED_MSG
 }
 void ACCommand::unban(mandatory<Unban>, mandatory<string> target) {
   ban_data.Del(target);
@@ -196,7 +196,7 @@ static bool handle_u(GameMode *a0, ItemStack *a1, BlockPos const *a2, BlockPos c
     async_log(
         "[ITEM] %s tries to use prohibited items(banned) %s pos: %d %d %d\n", sn.c_str(), a1->toString().c_str(), a2->x,
         a2->y, a2->z);
-    sendText(a0->getPlayer(), "§c您不能使用违禁物品", JUKEBOX_POPUP);
+    sendText(a0->getPlayer(), "§c您不能使用违禁物品", JUKEBOX_POPUP);//L_BEAR_BANNED_ITEM
     return 0;
   }
   if (warnitems.has(a1->getId())) {
@@ -214,7 +214,7 @@ enum CheatType { FLY, NOCLIP, INV, MOVE };
 static void notifyCheat(const string &name, CheatType x) {
   const char *CName[] = {"FLY", "NOCLIP", "Creative", "Teleport"};
   async_log("[%s] detected for %s\n", CName[x], name.c_str());
-  string kick = string("ac kick \"") + name + "\" §c你号没了";
+  string kick = string("ac kick \"") + name + "\" §c你号没了";//L_BEAR_CHEAT_KICK_MSG
   switch (x) {
   case FLY: runcmd(kick); break;
   case NOCLIP: runcmd(kick); break;
@@ -347,7 +347,7 @@ THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_t
         async_log(
             "[ITEM] %s tries to use dangerous items(banned) %s %s\n", name.c_str(), j.getFromItem()->toString().c_str(),
             j.getToItem()->toString().c_str());
-        sendText(&player, BANNED_ITEM, POPUP);
+        sendText(&player, L_BEAR_BANNED_ITEM, POPUP);
         return 6;
       }
       /*
@@ -431,11 +431,11 @@ static bool handle_dest(GameMode *a0, BlockPos const *a1) {
 void ACCommand::kick(mandatory<Kick>, mandatory<string> target) {
   auto sp = getplayer_byname2(target);
   if (!sp) {
-    getOutput().error("未能找到目标，或目标不符合被踢出的条件");
+    getOutput().error("未能找到目标，或目标不符合被踢出的条件");//L_BEAR_KICK_PLAYER_ERROR
     return;
   }
   forceKickPlayer(*sp);
-  getOutput().addMessage("踢出了 " + sp->getNameTag());
+  getOutput().addMessage("踢出了 " + sp->getNameTag());//L_BEAR_KICK_PLAYER_SUCC_MSG
   getOutput().success();
 }
 void ACCommand::bangui(mandatory<Bangui>) {
