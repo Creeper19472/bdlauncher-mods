@@ -14,8 +14,8 @@
 
 	#define L_MONEY_SET_TEXT	"§b已将玩家%s的余额设置为%d"
 
-	#define L_MONEY_CMD_MONEY		"金钱插件命令：查询，转账等"
-	#define L_MONEY_CMD_RELOAD		"重载金钱插件的配置"
+	#define L_MONEY_CMD_MONEY		"查询，消耗或转让虚拟货币的第一入口"
+	#define L_MONEY_CMD_RELOAD		"重载Money插件的配置"
 
 	#define M_QUERY_STR "§b%s 的余额为 %d"
 	#define M_SET_STR "§b成功将 %s 的余额设置为 %d"
