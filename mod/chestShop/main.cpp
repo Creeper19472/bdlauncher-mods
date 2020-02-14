@@ -6,6 +6,13 @@
 #include "../money/money.h"
 #include <fstream>
 #include <list>
+#include <sys/stat.h>
+#include <minecraft/block/BlockActor.h>
+#include <minecraft/block/BlockPos.h>
+#include <minecraft/core/GameMode.h>
+#include <minecraft/actor/InventorySource.h>
+#include <minecraft/actor/InventoryAction.h>
+#include <minecraft/item/ItemStack.h>
 
 const char meta[] __attribute__((used, section("meta"))) =
     "name:chestshop\n"
