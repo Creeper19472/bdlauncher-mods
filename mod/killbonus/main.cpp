@@ -11,6 +11,7 @@
 #include <minecraft/json.h>
 
 #include "base.h"
+#include "lang.h"
 #include "../money/money.h"
 #include "main.command.h"
 
@@ -44,12 +45,12 @@ void load(CommandOutput *out) {
     auto eid      = i["eid"].asInt(0);
     bonus_mp[eid] = {bMin, bMax};
   }
-  if (out) out->success("Reloaded!");
+  if (out) out->success(L_KBONUS_RELOADED);//L_KBONUS_RELOADED
 }
 static int dbg_die;
 static void toggle_dbg(CommandOutput *out) {
   dbg_die = !dbg_die;
-  if (out) out->success(std::string("Debug mode ") + (dbg_die ? "on" : "off"));
+  if (out) out->success(std::string(L_KBONUS_DEBUG_MODE) + (dbg_die ? L_KBONUS_DEBUG_ON : L_KBONUS_DEBUG_OFF));//L_KBONUS_DEBUG_MODE L_KBONUS_DEBUG_ON L_KBONUS_DEBUG_OFF
 }
 static void handle_die(Mob &a, ActorDamageSource const &b) {
   if (b.isChildEntitySource() || b.isEntitySource()) {
@@ -57,13 +58,21 @@ static void handle_die(Mob &a, ActorDamageSource const &b) {
     ServerPlayer *sp = getSP(ent);
     if (sp) {
       auto vid = a.getEntityTypeId();
-      if (dbg_die) { sendText(sp, "you killed" + std::to_string(vid)); }
+      if (dbg_die) {
+        char buf[128];
+        snprintf(buf,128,L_KBONUS_KILL_TEXT_DEBUG,vid);//L_KBONUS_KILL_TEXT
+        sendText(sp,string(buf));
+        // sendText(sp, L_KBONUS_KILL_TEXT + std::to_string(vid));
+      }//L_KBONUS_KILL_TEXT
       auto it = bonus_mp.find(vid);
       if (it != bonus_mp.end()) {
         auto mi = it->second.first, mx = it->second.second;
         auto addm = rand() % (mx + 1 - mi) + mi;
         add_money(sp->getNameTag(), addm);
-        sendText(sp, "you get $" + std::to_string(addm) + " by killing");
+        char buf[64];
+        snprintf(buf,64,L_KBONUS_KILL_TEXT,addm);//L_KBONUS_KILL_TEXT
+        sendText(sp, string(buf));
+        // sendText(sp, "you get $" + std::to_string() + " by killing");
       }
     }
   }
@@ -74,7 +83,7 @@ void CommandKillbonus::invoke(mandatory<KillbonusMode> mode) {
   switch (mode) {
   case KillbonusMode::Reload: load(out); break;
   case KillbonusMode::Debug: toggle_dbg(out); break;
-  default: getOutput().error("Unknown mode"); return;
+  default: getOutput().error(L_KBONUS_KILL_UNKNOWN_MODE); return;//L_KBONUS_KILL_UNKNOWN_MODE
   }
 }
 

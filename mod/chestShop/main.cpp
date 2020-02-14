@@ -1,6 +1,7 @@
 #include <Loader.h>
-//#include <MC.h>
+// #include <MC.h>
 #include "base.h"
+#include "lang.h"
 #include <minecraft/json.h>
 #include "../money/money.h"
 #include <fstream>
@@ -128,8 +129,8 @@ THook(void *, _ZN15ChestBlockActor8stopOpenER6Player, BlockActor &ac, Player &pl
   auto &pos  = ac.getPosition();
   Chest *gch = fetchChest(pos.x, pos.y, pos.z);
   if (gch) {
-    sessions.erase(pl.getNameTag());
-    last_sess.emplace(pl.getNameTag(), gch);
+    sessions.erase(pl.getName());
+    last_sess.emplace(pl.getName(), gch);
   }
   return original(ac, pl);
 }
@@ -137,11 +138,11 @@ THook(void *, _ZN15ChestBlockActor9startOpenER6Player, BlockActor &ac, Player &p
   auto &pos = ac.getPosition();
   // do_log("start pos %d %d %d",pos.x,pos.y,pos.z);
   Chest *gch = fetchChest(pos.x, pos.y, pos.z);
-  if (gch) { sessions.emplace(pl.getNameTag(), gch); }
+  if (gch) { sessions.emplace(pl.getName(), gch); }
   return original(ac, pl);
 }
 THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_thi, Player &player, bool b) {
-  const string &name = player.getNameTag();
+  const string &name = player.getName();
   auto it            = sessions.find(name);
   if (it == sessions.end()) return original(_thi, player, b);
   auto chest  = it->second;
@@ -158,7 +159,7 @@ THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_t
           IIDs = cid;
         } else {
           if (IIDs != cid) {
-            sendText(&player, "invlaid operation");
+            sendText(&player, L_CSHOP_INVALID_OPERATION);
             return 6;
           }
         }
@@ -180,7 +181,7 @@ THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_t
             pullstr  = fit->toString();
           } else {
             // invlaid
-            sendText(&player, "invlaid operation");
+            sendText(&player, L_CSHOP_INVALID_OPERATION);
             return 6;
           }
         }
@@ -190,20 +191,20 @@ THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_t
     }
   }
   if ((pushcnt + pullcnt) != 1 || lastslot < 0 || lastslot > 26) {
-    sendText(&player, "invlaid operation");
+    sendText(&player, L_CSHOP_INVALID_OPERATION);
     return 6;
   }
   if (pushcnt) {
     auto it = ply_price.find(name);
     if (it == ply_price.end()) {
-      sendText(&player, "invlaid operation");
+      sendText(&player, L_CSHOP_INVALID_OPERATION);
       return 6;
     }
     int price = it->second;
     ply_price.erase(it);
     if (price <= 0) return 6;
     if (chest->slots[lastslot].owner != "") {
-      sendText(&player, "this slot owned by " + name);
+      sendText(&player, L_CSHOP_SLOT_OWNED_TEXT + name);
       return 6;
     }
     chest->slots[lastslot] = Slot(name, price);
@@ -215,7 +216,7 @@ THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_t
     if (x.price == 0) {
       // no owner bought slot
       if (x.owner != name) {
-        sendText(&player, "not your slot");
+        sendText(&player, L_CSHOP_SLOT_NOT_URS);
         return 6;
       } else {
         x.owner = ""; // release slot
@@ -224,8 +225,8 @@ THook(unsigned long, _ZNK20InventoryTransaction11executeFullER6Playerb, void *_t
       }
     }
     char buf[1000];
-    sprintf(buf, "item %s by %s price %d,use /cshop buy to buy it", pullstr.c_str(), x.owner.c_str(), x.price);
-    sendText(&player, buf);
+    sprintf(buf, L_CSHOP_BUY_TEXT, pullstr.c_str(), x.owner.c_str(), x.price);
+    sendText(&player, string(buf));
     ply_select[name] = lastslot; // buy
     return 6;
   }
@@ -247,15 +248,15 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   auto name = b.getName();
   if (a[0] == "buy") {
     if (!ply_select.count(name) || sessions.count(name) || !last_sess.count(name)) {
-      outp.error("not selected");
+      outp.error(L_CSHOP_NOT_SELECTED);
       return;
     }
     if (last_sess[name]->do_buy(name, ply_select[name])) {
-      outp.success("ok");
+      outp.success(L_CSHOP_OPERATION_SUCC);
       ply_select.erase(name);
       return;
     } else {
-      outp.error("failed");
+      outp.error(L_CSHOP_OPERATION_FAIL);
       ply_select.erase(name);
       return;
     }
@@ -264,7 +265,7 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
     ARGSZ(2)
     int price = atoi(a[1]);
     if (price <= 0) {
-      outp.error("money must >0");
+      outp.error(L_CSHOP_SELL_WRONG_MONEY);
       return;
     }
     ply_price.emplace(b.getName(), price);
@@ -276,9 +277,9 @@ static void oncmd(argVec &a, CommandOrigin const &b, CommandOutput &outp) {
   }
 }
 static bool handle_u(GameMode *a0, ItemStack *a1, BlockPos const *a2, BlockPos const *dstPos, Block const *a5) {
-  auto nm          = a0->getPlayer()->getNameTag();
+  auto nm          = a0->getPlayer()->getName();
   auto it          = ply_price.find(nm);
-  ServerPlayer *sp = dynamic_cast<ServerPlayer*>(a0->getPlayer());
+  ServerPlayer *sp = a0->getPlayer();
   if (it == ply_price.end()) return 1;
   int state = it->second;
   if (state == -114514) {
@@ -288,7 +289,7 @@ static bool handle_u(GameMode *a0, ItemStack *a1, BlockPos const *a2, BlockPos c
     ch.z = a2->z;
     lc.emplace_back(ch);
     r_save();
-    sendText(sp, "okay!add shop chest");
+    sendText(sp, L_CSHOP_SLOT_SET_UP_SUCC);
     ply_price.erase(it);
     return 0;
   }
