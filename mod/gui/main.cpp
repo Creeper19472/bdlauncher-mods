@@ -181,5 +181,5 @@ bs.writeUnsignedVarInt(54);bs.writeUnsignedVarInt(3);bs.writeFloat(5);
 void mod_init(std::list<string> &modlist) {
   do_log("Loaded " BDL_TAG "");
   load_helper(modlist);
-  register_cmd("vars_debug", cm, "来自vars.cmd的烂摊子指令。在你身旁召唤一只无敌的钻石甲僵尸。", 1);
+  register_cmd("vars_debug", cm, "来自gui.mod的烂摊子指令。在你身旁召唤一只无敌的钻石甲僵尸。", 1);
 }

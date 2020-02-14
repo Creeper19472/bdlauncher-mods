@@ -6,6 +6,9 @@
 #include "seral.hpp"
 #include <minecraft/json.h>
 
+// Translation by Creeper19472
+// 0/0 Words (Complete)
+
 const char meta[] __attribute__((used, section("meta"))) =
     "name:wprotect\n"
     "version:20200121\n"

@@ -2,6 +2,9 @@
 //#include <MC.h>
 #include "base.h"
 
+// Translation by Creeper19472
+// 3/3 Words (Complete)
+
 const char meta[] __attribute__((used, section("meta"))) =
     "name:custname\n"
     "version:20200121\n"
