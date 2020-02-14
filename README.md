@@ -1,6 +1,6 @@
 # bdlauncher-mods
 
-> Beginning at 2 pm on February 14, 2020, we no longer accept new pull requests, and this repo has stopped developing. We think translation is sufficient for now. We do not translate plugins that are not commonly used or whose features are not marked.
+> Beginning at 2 pm on February 15, 2020, we no longer accept new pull requests, and this repo has stopped developing. We think translation is sufficient for now. We do not translate plugins that are not commonly used or whose features are not marked.
 
 A Chinese version of the mods package developed for bdlauncher
 
