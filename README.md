@@ -10,10 +10,10 @@ The original English version was developed by Sysca11 and other developers, and 
 
 Mods are updated with the original version.
 
-The original version of the portal is here: https://github.com/BDLDev/bdlauncher
+The original version of the portal is here: https://github.com/BDLDev/bdlauncher (By Sysca11 and other developers)
 
 # License
-Use MIT License(Source by Sysca11)
+We use custom License to restrict your rights to the software. Therefore, please read the license carefully to prevent you from incurring certain losses if you cross the border without your knowledge.
 
 # Docs
 Please go to the original bdlauncher documentation to see its description.
