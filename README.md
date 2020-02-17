@@ -1,6 +1,6 @@
 # bdlauncher-mods
 
-> Beginning at 2 pm on February 15, 2020, we no longer accept new pull requests, and this repo has stopped developing. We think translation is sufficient for now. We do not translate plugins that are not commonly used or whose features are not marked.
+> In the evening of February 16, 2020, bdlauncher officially terminated the update of the Linux version. We will terminate the development of this repo after all Mods finished. We apologize for any inconvenience this may cause.
 
 A Chinese version of the mods package developed for bdlauncher
 
