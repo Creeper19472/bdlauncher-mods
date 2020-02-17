@@ -16,9 +16,9 @@ enum class Kickall { kickall };
 enum class Crashme { crashme };
 struct ACCommand : CustomCommandContext {
 public:
-  inline static alias_list aliases  = {"bear"};
+  inline static alias_list aliases  = {"anticheat"};
   static constexpr auto cmd_name    = "ac";
-  static constexpr auto description = "Except";
+  static constexpr auto description = "AntiCheat functions";
   static constexpr auto permission  = CommandPermissionLevel::OP;
 
   ACCommand(CommandOrigin const &origin, CommandOutput &output) noexcept : CustomCommandContext(origin, output) {}

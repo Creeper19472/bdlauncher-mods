@@ -53,7 +53,7 @@
 static bool NOFMCBUG, NOPLAYERTPA;
 
 #include "log.hpp"
-#include "network.hpp"
+// #include "network.hpp"
 #include "ChatSan.hpp"
 #include "hidechk.hpp"
 #include "invchk.hpp"
@@ -64,7 +64,7 @@ using std::unordered_set;
 
 const char meta[] __attribute__((used, section("meta"))) =
     "name:bear\n"
-    "version:20200121\n"
+    "version:20200216\n"
     "author:sysca11\n"
     "depend:base@20200121,command@20200121,gui@20200121\n";
 
@@ -212,9 +212,9 @@ static void handle_left(ServerPlayer *a1) { async_log("[LEFT] %s left game\n", a
 static int FPushBlock, FExpOrb, FDest;
 enum CheatType { FLY, NOCLIP, INV, MOVE };
 static void notifyCheat(const string &name, CheatType x) {
-  const char *CName[] = {"FLY", "NOCLIP", "Creative", "Teleport"};
+  	const char *CName[] = {"FLY", "NOCLIP", "Inventory HACK", "Teleport"};
   async_log("[%s] detected for %s\n", CName[x], name.c_str());
-  string kick = string("ac kick \"") + name + "\" §c你号没了";//L_BEAR_CHEAT_KICK_MSG
+  string kick = string("ac kick \"") + name + "\"";//L_BEAR_CHEAT_KICK_MSG
   switch (x) {
   case FLY: runcmd(kick); break;
   case NOCLIP: runcmd(kick); break;
@@ -479,7 +479,7 @@ void mod_init(std::list<string> &modlist) {
   reg_chat(hkc);
   reg_destroy(handle_dest);
   _load_config();
-  if (getenv("LOGNET")) rori = (typeof(rori))(MyHook(fp(recvfrom), fp(recvfrom_hook)));
+  //if (getenv("LOGNET")) rori = (typeof(rori))(MyHook(fp(recvfrom), fp(recvfrom_hook)));
   do_log("Loaded " BDL_TAG);
   load_helper(modlist);
 }
